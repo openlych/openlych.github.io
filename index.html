@@ -1,0 +1,491 @@
+<!doctype html>
+<html lang="en" class="scroll-smooth">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>OpenLych — local web-testing workbench</title>
+<meta name="description" content="OpenLych is a local web-testing workbench. Define a staged request flow, point a job at a list, and run it with parallel runners while outcomes update live. For authorized security research only." />
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+
+<!-- Theme init: set .dark before paint to avoid a flash. -->
+<script>
+  (function () {
+    try {
+      var saved = localStorage.getItem('ol-theme');
+      var dark = saved ? saved === 'dark'
+                       : window.matchMedia('(prefers-color-scheme: dark)').matches;
+      document.documentElement.classList.toggle('dark', dark);
+    } catch (e) {
+      document.documentElement.classList.add('dark');
+    }
+  })();
+</script>
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    darkMode: 'class',
+    theme: {
+      extend: {
+        fontFamily: {
+          sans: ['Inter', 'system-ui', 'sans-serif'],
+          mono: ['"JetBrains Mono"', 'ui-monospace', 'monospace'],
+        },
+        colors: {
+          bg:        'var(--bg)',
+          surface:   'var(--surface)',
+          'surface-2': 'var(--surface-2)',
+          border:    'var(--border)',
+          'border-hi': 'var(--border-hi)',
+          text:      'var(--text)',
+          'text-dim': 'var(--text-dim)',
+          'text-mute': 'var(--text-mute)',
+          accent:    'var(--accent)',
+          'accent-hi': 'var(--accent-hi)',
+          'accent-dim': 'var(--accent-dim)',
+          ok:   '#34D399',
+          warn: '#FBBF24',
+          err:  '#F87171',
+          info: '#60A5FA',
+        },
+      },
+    },
+  };
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+
+<style>
+  :root {
+    --bg:        #F5F6F8;
+    --surface:   #FFFFFF;
+    --surface-2: #ECEEF2;
+    --border:    #DDE1E8;
+    --border-hi: #C7CCD6;
+    --text:      #1A1D24;
+    --text-dim:  #5B6473;
+    --text-mute: #8A93A3;
+    --accent:     #D63A6C;
+    --accent-hi:  #E7467A;
+    --accent-dim: #F7D4E0;
+    color-scheme: light;
+  }
+  html.dark {
+    --bg:        #0F1117;
+    --surface:   #171A21;
+    --surface-2: #1E222B;
+    --border:    #272B33;
+    --border-hi: #343A45;
+    --text:      #DDE3EC;
+    --text-dim:  #8A93A3;
+    --text-mute: #5B6473;
+    --accent:     #E7467A;
+    --accent-hi:  #FF6B98;
+    --accent-dim: #9E2E54;
+    color-scheme: dark;
+  }
+  body { background: var(--bg); color: var(--text); }
+  ::selection { background: var(--accent); color: #fff; }
+  /* faint dotted grid used behind the hero */
+  .grid-bg {
+    background-image: radial-gradient(var(--border-hi) 1px, transparent 1px);
+    background-size: 22px 22px;
+    mask-image: radial-gradient(ellipse 70% 60% at 50% 35%, #000 40%, transparent 100%);
+    -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 35%, #000 40%, transparent 100%);
+  }
+</style>
+</head>
+
+<body class="font-sans antialiased">
+
+<!-- ======================= NAV ======================= -->
+<header class="sticky top-0 z-40 border-b border-border bg-bg/80 backdrop-blur">
+  <div class="mx-auto flex h-16 max-w-6xl items-center justify-between px-4">
+    <a href="#top" class="flex items-center gap-2.5" aria-label="OpenLych home">
+      <!-- mark -->
+      <svg width="30" height="30" viewBox="0 0 64 64" aria-hidden="true">
+        <mask id="navmask">
+          <rect width="64" height="64" fill="#fff" />
+          <path d="M19 21 L30 32 L19 43" fill="none" stroke="#000" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round" />
+          <path d="M35 43 H45" stroke="#000" stroke-width="6.5" stroke-linecap="round" />
+        </mask>
+        <rect x="4" y="4" width="56" height="56" rx="17" fill="var(--accent-hi)" mask="url(#navmask)" />
+      </svg>
+      <span class="font-mono text-lg font-bold tracking-tight">
+        <span class="text-text">open</span><span class="text-accent">lych</span>
+      </span>
+    </a>
+
+    <nav class="hidden items-center gap-7 text-sm text-text-dim md:flex">
+      <a href="#overview"    class="transition hover:text-text">Overview</a>
+      <a href="#features"    class="transition hover:text-text">Features</a>
+      <a href="#screenshots" class="transition hover:text-text">Screenshots</a>
+      <a href="#safety"      class="transition hover:text-text">Safety</a>
+    </nav>
+
+    <div class="flex items-center gap-2">
+      <button id="theme-toggle" type="button"
+              class="grid h-9 w-9 place-items-center rounded-md border border-border text-text-dim transition hover:border-border-hi hover:text-text"
+              aria-label="Toggle colour theme">
+        <svg class="hidden h-[18px] w-[18px] dark:block" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path stroke-linecap="round" d="M12 2v2m0 16v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4m11.4-11.4 1.4-1.4"/></svg>
+        <svg class="block h-[18px] w-[18px] dark:hidden" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></svg>
+      </button>
+      <a href="#download"
+         class="rounded-md bg-accent px-4 py-2 text-sm font-semibold text-white transition hover:bg-accent-hi">
+        Download
+      </a>
+    </div>
+  </div>
+</header>
+
+<main id="top">
+
+<!-- ======================= HERO ======================= -->
+<section class="relative overflow-hidden">
+  <div class="grid-bg pointer-events-none absolute inset-0"></div>
+  <div class="relative mx-auto max-w-6xl px-4 pb-16 pt-20 text-center md:pt-28">
+    <span class="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-3 py-1 text-xs font-medium text-text-dim">
+      <span class="h-1.5 w-1.5 rounded-full bg-ok"></span>
+      Linux desktop · headless browser · Windows planned
+    </span>
+
+    <h1 class="mx-auto mt-6 max-w-3xl text-4xl font-bold leading-[1.1] tracking-tight md:text-6xl">
+      The local web-testing<br class="hidden sm:block" /> workbench
+    </h1>
+
+    <p class="mx-auto mt-5 max-w-xl text-lg text-text-dim">
+      Define a staged request <strong class="font-semibold text-text">flow</strong>, point a
+      <strong class="font-semibold text-text">job</strong> at an input
+      <strong class="font-semibold text-text">list</strong>, and run it with
+      <em class="not-italic text-accent">N parallel runners</em> — outcomes update live, per runner.
+    </p>
+
+    <div class="mt-8 flex flex-wrap items-center justify-center gap-3">
+      <a href="#download" class="rounded-md bg-accent px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-accent-hi">
+        Download OpenLych
+      </a>
+      <a href="https://github.com/your/openlych" target="_blank" rel="noopener"
+         class="inline-flex items-center gap-2 rounded-md border border-border-hi bg-surface px-5 py-2.5 text-sm font-semibold text-text transition hover:border-text-mute">
+        <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .5A11.5 11.5 0 0 0 .5 12a11.5 11.5 0 0 0 7.86 10.92c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.37-3.88-1.37-.53-1.34-1.29-1.7-1.29-1.7-1.05-.72.08-.7.08-.7 1.16.08 1.77 1.2 1.77 1.2 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.56-.3-5.26-1.28-5.26-5.7 0-1.26.45-2.29 1.19-3.1-.12-.3-.52-1.48.11-3.08 0 0 .97-.31 3.18 1.18a11 11 0 0 1 5.8 0c2.2-1.5 3.17-1.18 3.17-1.18.63 1.6.23 2.78.11 3.08.74.81 1.19 1.84 1.19 3.1 0 4.43-2.7 5.4-5.27 5.69.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 23.5 12 11.5 11.5 0 0 0 12 .5Z"/></svg>
+        View on GitHub
+      </a>
+    </div>
+    <p class="mt-4 font-mono text-xs text-text-mute">Open source · runs entirely on your machine</p>
+
+    <!-- hero mock: faux Jobs tab -->
+    <div class="mx-auto mt-14 max-w-4xl text-left">
+      <div class="overflow-hidden rounded-lg border border-border bg-surface shadow-2xl shadow-black/20">
+        <!-- window chrome -->
+        <div class="flex items-center gap-2 border-b border-border bg-surface-2 px-4 py-2.5">
+          <span class="h-3 w-3 rounded-full bg-err/70"></span>
+          <span class="h-3 w-3 rounded-full bg-warn/70"></span>
+          <span class="h-3 w-3 rounded-full bg-ok/70"></span>
+          <span class="ml-3 font-mono text-xs text-text-mute">openlych — Jobs</span>
+        </div>
+        <!-- toolbar -->
+        <div class="flex items-center gap-2 border-b border-border px-4 py-2.5 text-xs">
+          <span class="rounded bg-accent px-2.5 py-1 font-semibold text-white">New</span>
+          <span class="rounded border border-border-hi px-2.5 py-1 text-text-dim">Start All</span>
+          <span class="rounded border border-border-hi px-2.5 py-1 text-text-dim">Stop All</span>
+          <span class="ml-auto font-mono text-text-mute">3 jobs · 24 runners</span>
+        </div>
+        <!-- job rows -->
+        <div class="divide-y divide-border font-mono text-xs">
+          <div class="flex items-center gap-4 px-4 py-3">
+            <span class="h-2 w-2 shrink-0 rounded-full bg-ok"></span>
+            <span class="w-40 truncate text-text">login-check.kdl</span>
+            <span class="text-text-mute">accounts.txt · 8 bots</span>
+            <span class="ml-auto flex gap-3">
+              <span class="text-ok">OK 1,204</span>
+              <span class="text-warn">CUSTOM 37</span>
+              <span class="text-err">FAIL 5,991</span>
+            </span>
+          </div>
+          <div class="flex items-center gap-4 px-4 py-3">
+            <span class="h-2 w-2 shrink-0 rounded-full bg-info"></span>
+            <span class="w-40 truncate text-text">api-probe.kdl</span>
+            <span class="text-text-mute">endpoints.csv · 12 bots</span>
+            <span class="ml-auto flex gap-3">
+              <span class="text-ok">OK 318</span>
+              <span class="text-info">RETRY 12</span>
+              <span class="text-err">FAIL 44</span>
+            </span>
+          </div>
+          <div class="flex items-center gap-4 px-4 py-3 opacity-70">
+            <span class="h-2 w-2 shrink-0 rounded-full bg-text-mute"></span>
+            <span class="w-40 truncate text-text">headers-audit.kdl</span>
+            <span class="text-text-mute">hosts.txt · 4 bots</span>
+            <span class="ml-auto text-text-mute">idle</span>
+          </div>
+        </div>
+      </div>
+      <p class="mt-2 text-center text-xs text-text-mute">Representative UI mock — swap for a real screenshot.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= OVERVIEW ======================= -->
+<section id="overview" class="border-t border-border bg-surface/40">
+  <div class="mx-auto max-w-4xl px-4 py-20">
+    <h2 class="text-sm font-semibold uppercase tracking-wider text-accent">What it is</h2>
+    <p class="mt-4 text-2xl font-semibold leading-snug md:text-3xl">
+      OpenLych is a workbench for testing how web requests behave — built, run, and inspected
+      entirely on your own machine.
+    </p>
+    <div class="mt-6 space-y-4 text-text-dim">
+      <p>
+        You build a <strong class="font-medium text-text">flow</strong> as a top-to-bottom stack of
+        steps — Request, Parse, Set, Key Check, If, Repeat, Result — visually with drag-to-reorder
+        blocks, or as KDL text. A <strong class="font-medium text-text">job</strong> aims that flow
+        at an input <strong class="font-medium text-text">list</strong> (a wordlist or CSV) and runs
+        it across <strong class="font-medium text-text">N runners</strong> pulling a shared queue.
+      </p>
+      <p>
+        Results land in live outcome buckets with per-item detail and captured values. Each list
+        item runs in its own cookie-jar session, so a login's <span class="font-mono text-sm">Set-Cookie</span>
+        carries through the item's later requests automatically. It runs as a native desktop window
+        or headless in the browser.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= FEATURES ======================= -->
+<section id="features" class="border-t border-border">
+  <div class="mx-auto max-w-6xl px-4 py-20">
+    <h2 class="text-center text-3xl font-bold tracking-tight">Everything in one window</h2>
+    <p class="mx-auto mt-3 max-w-xl text-center text-text-dim">
+      A tabbed shell: build configs, run jobs, manage wordlists, and browse results.
+    </p>
+
+    <div class="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <!-- card -->
+      <div class="rounded-lg border border-border bg-surface p-6 transition hover:border-border-hi">
+        <div class="grid h-10 w-10 place-items-center rounded-md bg-accent-dim text-accent">
+          <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="4" rx="1"/><rect x="3" y="10" width="18" height="4" rx="1"/><rect x="3" y="16" width="18" height="4" rx="1"/></svg>
+        </div>
+        <h3 class="mt-4 font-semibold">Visual flow builder</h3>
+        <p class="mt-2 text-sm text-text-dim">Stacked blocks with drag-reorder and collapsible branch/loop steps — or edit the same config as highlighted KDL text.</p>
+      </div>
+
+      <div class="rounded-lg border border-border bg-surface p-6 transition hover:border-border-hi">
+        <div class="grid h-10 w-10 place-items-center rounded-md bg-accent-dim text-accent">
+          <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 2 3 14h7l-1 8 10-12h-7l1-8Z"/></svg>
+        </div>
+        <h3 class="mt-4 font-semibold">Parallel execution engine</h3>
+        <p class="mt-2 text-sm text-text-dim">N runners pull a shared queue and sort each item into outcome buckets, with per-item results and captures as it runs.</p>
+      </div>
+
+      <div class="rounded-lg border border-border bg-surface p-6 transition hover:border-border-hi">
+        <div class="grid h-10 w-10 place-items-center rounded-md bg-accent-dim text-accent">
+          <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 7h16M4 12h10M4 17h7"/></svg>
+        </div>
+        <h3 class="mt-4 font-semibold">Four parse modes</h3>
+        <p class="mt-2 text-sm text-text-dim">Pull values out of a response by JSON path, LR (left/right), CSS selector, or Regex — with prefix/suffix, all-matches, and capture flags.</p>
+      </div>
+
+      <div class="rounded-lg border border-border bg-surface p-6 transition hover:border-border-hi">
+        <div class="grid h-10 w-10 place-items-center rounded-md bg-accent-dim text-accent">
+          <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v18m0-18 7 4v10l-7 4-7-4V7l7-4Z"/></svg>
+        </div>
+        <h3 class="mt-4 font-semibold">Full request control</h3>
+        <p class="mt-2 text-sm text-text-dim">Auto-redirect toggle, templated basic auth, a TLS floor, multipart/form-data bodies, and a per-item cookie jar.</p>
+      </div>
+
+      <div class="rounded-lg border border-border bg-surface p-6 transition hover:border-border-hi">
+        <div class="grid h-10 w-10 place-items-center rounded-md bg-accent-dim text-accent">
+          <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><ellipse cx="12" cy="6" rx="8" ry="3"/><path stroke-linecap="round" d="M4 6v12c0 1.7 3.6 3 8 3s8-1.3 8-3V6M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></svg>
+        </div>
+        <h3 class="mt-4 font-semibold">Wordlists &amp; Hits DB</h3>
+        <p class="mt-2 text-sm text-text-dim">Load txt/CSV datasets as variables; captured hits persist to SQLite with config/type filters and capture search.</p>
+      </div>
+
+      <div class="rounded-lg border border-border bg-surface p-6 transition hover:border-border-hi">
+        <div class="grid h-10 w-10 place-items-center rounded-md bg-accent-dim text-accent">
+          <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path stroke-linecap="round" stroke-linejoin="round" d="M19 12a7 7 0 0 0-.1-1l2-1.6-2-3.4-2.4 1a7 7 0 0 0-1.7-1l-.3-2.5H9.5l-.4 2.5a7 7 0 0 0-1.7 1l-2.3-1-2 3.4 2 1.6a7 7 0 0 0 0 2l-2 1.6 2 3.4 2.3-1a7 7 0 0 0 1.7 1l.4 2.5h4.9l.4-2.5a7 7 0 0 0 1.7-1l2.3 1 2-3.4-2-1.6c.1-.3.1-.7.1-1Z"/></svg>
+        </div>
+        <h3 class="mt-4 font-semibold">Themeable &amp; local-first</h3>
+        <p class="mt-2 text-sm text-text-dim">Dark/light/system theme, accent &amp; density, engine defaults, and finish notifications — all stored on your machine. No cloud.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= SCREENSHOTS ======================= -->
+<section id="screenshots" class="border-t border-border bg-surface/40">
+  <div class="mx-auto max-w-6xl px-4 py-20">
+    <h2 class="text-center text-3xl font-bold tracking-tight">A closer look</h2>
+    <p class="mx-auto mt-3 max-w-xl text-center text-text-dim">
+      Placeholder frames — drop your real screenshots into <span class="font-mono text-sm">assets/</span> and swap the panels below.
+    </p>
+
+    <div class="mt-12 grid gap-6 md:grid-cols-2">
+      <!-- shot frame -->
+      <figure class="overflow-hidden rounded-lg border border-border bg-surface">
+        <div class="flex items-center gap-2 border-b border-border bg-surface-2 px-4 py-2">
+          <span class="h-2.5 w-2.5 rounded-full bg-border-hi"></span>
+          <span class="h-2.5 w-2.5 rounded-full bg-border-hi"></span>
+          <span class="h-2.5 w-2.5 rounded-full bg-border-hi"></span>
+          <span class="ml-2 font-mono text-xs text-text-mute">Jobs</span>
+        </div>
+        <div class="grid aspect-video place-items-center bg-bg text-text-mute">
+          <span class="font-mono text-sm">screenshot — Jobs tab</span>
+        </div>
+        <figcaption class="border-t border-border px-4 py-3 text-sm text-text-dim">Dense job list with live per-runner outcome counters.</figcaption>
+      </figure>
+
+      <figure class="overflow-hidden rounded-lg border border-border bg-surface">
+        <div class="flex items-center gap-2 border-b border-border bg-surface-2 px-4 py-2">
+          <span class="h-2.5 w-2.5 rounded-full bg-border-hi"></span>
+          <span class="h-2.5 w-2.5 rounded-full bg-border-hi"></span>
+          <span class="h-2.5 w-2.5 rounded-full bg-border-hi"></span>
+          <span class="ml-2 font-mono text-xs text-text-mute">Stacker</span>
+        </div>
+        <div class="grid aspect-video place-items-center bg-bg text-text-mute">
+          <span class="font-mono text-sm">screenshot — visual flow editor</span>
+        </div>
+        <figcaption class="border-t border-border px-4 py-3 text-sm text-text-dim">Stacked blocks with drag-reorder, or the KDL text editor.</figcaption>
+      </figure>
+
+      <figure class="overflow-hidden rounded-lg border border-border bg-surface">
+        <div class="flex items-center gap-2 border-b border-border bg-surface-2 px-4 py-2">
+          <span class="h-2.5 w-2.5 rounded-full bg-border-hi"></span>
+          <span class="h-2.5 w-2.5 rounded-full bg-border-hi"></span>
+          <span class="h-2.5 w-2.5 rounded-full bg-border-hi"></span>
+          <span class="ml-2 font-mono text-xs text-text-mute">Hits DB</span>
+        </div>
+        <div class="grid aspect-video place-items-center bg-bg text-text-mute">
+          <span class="font-mono text-sm">screenshot — Hits DB</span>
+        </div>
+        <figcaption class="border-t border-border px-4 py-3 text-sm text-text-dim">Persisted hits in SQLite with filters and capture search.</figcaption>
+      </figure>
+
+      <figure class="overflow-hidden rounded-lg border border-border bg-surface">
+        <div class="flex items-center gap-2 border-b border-border bg-surface-2 px-4 py-2">
+          <span class="h-2.5 w-2.5 rounded-full bg-border-hi"></span>
+          <span class="h-2.5 w-2.5 rounded-full bg-border-hi"></span>
+          <span class="h-2.5 w-2.5 rounded-full bg-border-hi"></span>
+          <span class="ml-2 font-mono text-xs text-text-mute">Settings</span>
+        </div>
+        <div class="grid aspect-video place-items-center bg-bg text-text-mute">
+          <span class="font-mono text-sm">screenshot — Settings</span>
+        </div>
+        <figcaption class="border-t border-border px-4 py-3 text-sm text-text-dim">Appearance, engine defaults, notifications, and data tools.</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= HOW IT WORKS ======================= -->
+<section class="border-t border-border">
+  <div class="mx-auto max-w-5xl px-4 py-20">
+    <h2 class="text-center text-3xl font-bold tracking-tight">From flow to results in three steps</h2>
+    <div class="mt-12 grid gap-8 md:grid-cols-3">
+      <div>
+        <span class="font-mono text-sm font-bold text-accent">01</span>
+        <h3 class="mt-2 font-semibold">Build a flow</h3>
+        <p class="mt-2 text-sm text-text-dim">Stack Request / Parse / Set / Key Check / If / Repeat / Result blocks. Template fields with <span class="font-mono text-xs">{{name}}</span> or <span class="font-mono text-xs">&lt;NAME&gt;</span> variables.</p>
+      </div>
+      <div>
+        <span class="font-mono text-sm font-bold text-accent">02</span>
+        <h3 class="mt-2 font-semibold">Point a job at a list</h3>
+        <p class="mt-2 text-sm text-text-dim">Pick a wordlist or CSV and a runner count. Each line seeds variables; CSV columns become named variables.</p>
+      </div>
+      <div>
+        <span class="font-mono text-sm font-bold text-accent">03</span>
+        <h3 class="mt-2 font-semibold">Run &amp; inspect</h3>
+        <p class="mt-2 text-sm text-text-dim">Watch outcome counters update live per runner, open any item's detail, and keep the hits you captured.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= SAFETY / DISCLAIMER ======================= -->
+<section id="safety" class="border-t border-border bg-surface/40">
+  <div class="mx-auto max-w-4xl px-4 py-20">
+    <div class="rounded-lg border-2 border-accent/60 bg-surface p-8">
+      <div class="flex items-center gap-3">
+        <svg class="h-6 w-6 shrink-0 text-accent" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v4m0 4h.01M10.3 3.9 2 18.1A2 2 0 0 0 3.7 21h16.6a2 2 0 0 0 1.7-2.9L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg>
+        <h2 class="text-2xl font-bold tracking-tight">Authorized use only</h2>
+      </div>
+      <p class="mt-5 text-text-dim">
+        OpenLych is a tool for <strong class="font-semibold text-text">security research and testing systems you own
+        or are explicitly authorized to test</strong>. It exists to help you understand and harden your own
+        applications.
+      </p>
+      <ul class="mt-5 space-y-3 text-sm text-text-dim">
+        <li class="flex gap-3">
+          <span class="mt-0.5 text-ok" aria-hidden="true">✓</span>
+          <span>Use it only against targets you own, or where you hold <strong class="font-medium text-text">written permission</strong> to test.</span>
+        </li>
+        <li class="flex gap-3">
+          <span class="mt-0.5 text-err" aria-hidden="true">✕</span>
+          <span><strong class="font-medium text-text">Never</strong> point it at unknown or third-party systems, or at any service without authorization. Doing so is likely illegal.</span>
+        </li>
+        <li class="flex gap-3">
+          <span class="mt-0.5 text-err" aria-hidden="true">✕</span>
+          <span>Not for credential stuffing, account takeover, or any attack on accounts and systems that are not yours.</span>
+        </li>
+      </ul>
+      <p class="mt-5 text-sm text-text-mute">
+        You are solely responsible for how you use OpenLych and for complying with all applicable laws and
+        the terms of service of any system you interact with. The authors accept no liability for misuse.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= DOWNLOAD / CTA ======================= -->
+<section id="download" class="border-t border-border">
+  <div class="mx-auto max-w-3xl px-4 py-24 text-center">
+    <h2 class="text-3xl font-bold tracking-tight md:text-4xl">Get OpenLych</h2>
+    <p class="mx-auto mt-4 max-w-md text-text-dim">
+      Open source and local-first. Grab a build from the releases page, or clone and build it yourself.
+    </p>
+    <div class="mt-8 flex flex-wrap items-center justify-center gap-3">
+      <a href="https://github.com/your/openlych/releases" target="_blank" rel="noopener"
+         class="rounded-md bg-accent px-6 py-3 text-sm font-semibold text-white transition hover:bg-accent-hi">
+        Download latest release
+      </a>
+      <a href="https://github.com/your/openlych" target="_blank" rel="noopener"
+         class="inline-flex items-center gap-2 rounded-md border border-border-hi bg-surface px-6 py-3 text-sm font-semibold text-text transition hover:border-text-mute">
+        <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .5A11.5 11.5 0 0 0 .5 12a11.5 11.5 0 0 0 7.86 10.92c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.37-3.88-1.37-.53-1.34-1.29-1.7-1.29-1.7-1.05-.72.08-.7.08-.7 1.16.08 1.77 1.2 1.77 1.2 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.56-.3-5.26-1.28-5.26-5.7 0-1.26.45-2.29 1.19-3.1-.12-.3-.52-1.48.11-3.08 0 0 .97-.31 3.18 1.18a11 11 0 0 1 5.8 0c2.2-1.5 3.17-1.18 3.17-1.18.63 1.6.23 2.78.11 3.08.74.81 1.19 1.84 1.19 3.1 0 4.43-2.7 5.4-5.27 5.69.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 23.5 12 11.5 11.5 0 0 0 12 .5Z"/></svg>
+        Source on GitHub
+      </a>
+    </div>
+    <p class="mt-6 font-mono text-xs text-text-mute">Linux (WebKitGTK) today · Windows 10/11 planned</p>
+  </div>
+</section>
+
+</main>
+
+<!-- ======================= FOOTER ======================= -->
+<footer class="border-t border-border">
+  <div class="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-4 py-10 sm:flex-row">
+    <div class="flex items-center gap-2.5">
+      <svg width="24" height="24" viewBox="0 0 64 64" aria-hidden="true">
+        <mask id="footmask">
+          <rect width="64" height="64" fill="#fff" />
+          <path d="M19 21 L30 32 L19 43" fill="none" stroke="#000" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round" />
+          <path d="M35 43 H45" stroke="#000" stroke-width="6.5" stroke-linecap="round" />
+        </mask>
+        <rect x="4" y="4" width="56" height="56" rx="17" fill="var(--accent-hi)" mask="url(#footmask)" />
+      </svg>
+      <span class="font-mono text-sm font-bold tracking-tight"><span class="text-text">open</span><span class="text-accent">lych</span></span>
+    </div>
+    <p class="text-xs text-text-mute">For authorized security research only. © 2026 OpenLych.</p>
+    <a href="https://github.com/your/openlych" target="_blank" rel="noopener" class="text-xs text-text-dim transition hover:text-text">GitHub</a>
+  </div>
+</footer>
+
+<script>
+  document.getElementById('theme-toggle').addEventListener('click', function () {
+    var dark = document.documentElement.classList.toggle('dark');
+    try { localStorage.setItem('ol-theme', dark ? 'dark' : 'light'); } catch (e) {}
+  });
+</script>
+
+</body>
+</html>
