@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>OpenLych — local web-testing workbench</title>
+<title>OpenLych: local web-testing workbench</title>
 <meta name="description" content="OpenLych is a local web-testing workbench. Define a staged request flow, point a job at a list, and run it with parallel runners while outcomes update live. For authorized security research only." />
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
 
@@ -159,7 +159,7 @@
       Define a staged request <strong class="font-semibold text-text">flow</strong>, point a
       <strong class="font-semibold text-text">job</strong> at an input
       <strong class="font-semibold text-text">list</strong>, and run it with
-      <em class="not-italic text-accent">N parallel runners</em> — outcomes update live, per runner.
+      <em class="not-italic text-accent">N parallel runners</em>. Outcomes update live, per runner.
     </p>
 
     <div class="mt-8 flex flex-wrap items-center justify-center gap-3">
@@ -175,53 +175,19 @@
     <p class="mt-4 font-mono text-xs text-text-mute">Open source · runs entirely on your machine</p>
 
     <!-- hero mock: faux Jobs tab -->
-    <div class="mx-auto mt-14 max-w-4xl text-left">
+    <div class="mx-auto mt-14 max-w-4xl">
       <div class="overflow-hidden rounded-lg border border-border bg-surface shadow-2xl shadow-black/20">
-        <!-- window chrome -->
         <div class="flex items-center gap-2 border-b border-border bg-surface-2 px-4 py-2.5">
           <span class="h-3 w-3 rounded-full bg-err/70"></span>
           <span class="h-3 w-3 rounded-full bg-warn/70"></span>
           <span class="h-3 w-3 rounded-full bg-ok/70"></span>
-          <span class="ml-3 font-mono text-xs text-text-mute">openlych — Jobs</span>
+          <span class="ml-3 font-mono text-xs text-text-mute">openlych</span>
         </div>
-        <!-- toolbar -->
-        <div class="flex items-center gap-2 border-b border-border px-4 py-2.5 text-xs">
-          <span class="rounded bg-accent px-2.5 py-1 font-semibold text-white">New</span>
-          <span class="rounded border border-border-hi px-2.5 py-1 text-text-dim">Start All</span>
-          <span class="rounded border border-border-hi px-2.5 py-1 text-text-dim">Stop All</span>
-          <span class="ml-auto font-mono text-text-mute">3 jobs · 24 runners</span>
-        </div>
-        <!-- job rows -->
-        <div class="divide-y divide-border font-mono text-xs">
-          <div class="flex items-center gap-4 px-4 py-3">
-            <span class="h-2 w-2 shrink-0 rounded-full bg-ok"></span>
-            <span class="w-40 truncate text-text">login-check.kdl</span>
-            <span class="text-text-mute">accounts.txt · 8 bots</span>
-            <span class="ml-auto flex gap-3">
-              <span class="text-ok">OK 1,204</span>
-              <span class="text-warn">CUSTOM 37</span>
-              <span class="text-err">FAIL 5,991</span>
-            </span>
-          </div>
-          <div class="flex items-center gap-4 px-4 py-3">
-            <span class="h-2 w-2 shrink-0 rounded-full bg-info"></span>
-            <span class="w-40 truncate text-text">api-probe.kdl</span>
-            <span class="text-text-mute">endpoints.csv · 12 bots</span>
-            <span class="ml-auto flex gap-3">
-              <span class="text-ok">OK 318</span>
-              <span class="text-info">RETRY 12</span>
-              <span class="text-err">FAIL 44</span>
-            </span>
-          </div>
-          <div class="flex items-center gap-4 px-4 py-3 opacity-70">
-            <span class="h-2 w-2 shrink-0 rounded-full bg-text-mute"></span>
-            <span class="w-40 truncate text-text">headers-audit.kdl</span>
-            <span class="text-text-mute">hosts.txt · 4 bots</span>
-            <span class="ml-auto text-text-mute">idle</span>
-          </div>
-        </div>
+        <img src="assets/shot-stacker-blocks.png" width="1920" height="1080"
+             alt="OpenLych Configs tab, Stacker view: a Request block and an If block with Then/Else result steps"
+             class="block w-full" loading="eager" />
       </div>
-      <p class="mt-2 text-center text-xs text-text-mute">Representative UI mock — swap for a real screenshot.</p>
+      <p class="mt-3 text-center text-sm text-text-dim">Building a flow as visual blocks in the Config editor.</p>
     </div>
   </div>
 </section>
@@ -231,14 +197,14 @@
   <div class="mx-auto max-w-4xl px-4 py-20">
     <h2 class="text-sm font-semibold uppercase tracking-wider text-accent">What it is</h2>
     <p class="mt-4 text-2xl font-semibold leading-snug md:text-3xl">
-      OpenLych is a workbench for testing how web requests behave — built, run, and inspected
+      OpenLych is a workbench for testing how web requests behave, built, run, and inspected
       entirely on your own machine.
     </p>
     <div class="mt-6 space-y-4 text-text-dim">
       <p>
         You build a <strong class="font-medium text-text">flow</strong> as a top-to-bottom stack of
-        steps — Request, Parse, Set, Key Check, If, Repeat, Result — visually with drag-to-reorder
-        blocks, or as KDL text. A <strong class="font-medium text-text">job</strong> aims that flow
+        steps (Request, Parse, Set, Key Check, If, Repeat, Result), visually with drag-to-reorder
+        blocks or as KDL text. A <strong class="font-medium text-text">job</strong> aims that flow
         at an input <strong class="font-medium text-text">list</strong> (a wordlist or CSV) and runs
         it across <strong class="font-medium text-text">N runners</strong> pulling a shared queue.
       </p>
@@ -255,9 +221,9 @@
 <!-- ======================= FEATURES ======================= -->
 <section id="features" class="border-t border-border">
   <div class="mx-auto max-w-6xl px-4 py-20">
-    <h2 class="text-center text-3xl font-bold tracking-tight">Everything in one window</h2>
+    <h2 class="text-center text-3xl font-bold tracking-tight">One window, five tabs</h2>
     <p class="mx-auto mt-3 max-w-xl text-center text-text-dim">
-      A tabbed shell: build configs, run jobs, manage wordlists, and browse results.
+      Jobs, Configs, Wordlists, Hits DB, and Settings. Build configs, run jobs, and browse results in one place.
     </p>
 
     <div class="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -267,7 +233,7 @@
           <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="4" rx="1"/><rect x="3" y="10" width="18" height="4" rx="1"/><rect x="3" y="16" width="18" height="4" rx="1"/></svg>
         </div>
         <h3 class="mt-4 font-semibold">Visual flow builder</h3>
-        <p class="mt-2 text-sm text-text-dim">Stacked blocks with drag-reorder and collapsible branch/loop steps — or edit the same config as highlighted KDL text.</p>
+        <p class="mt-2 text-sm text-text-dim">Stacked blocks with drag-reorder and collapsible branch/loop steps, or edit the same config as highlighted KDL text.</p>
       </div>
 
       <div class="rounded-lg border border-border bg-surface p-6 transition hover:border-border-hi">
@@ -283,7 +249,7 @@
           <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 7h16M4 12h10M4 17h7"/></svg>
         </div>
         <h3 class="mt-4 font-semibold">Four parse modes</h3>
-        <p class="mt-2 text-sm text-text-dim">Pull values out of a response by JSON path, LR (left/right), CSS selector, or Regex — with prefix/suffix, all-matches, and capture flags.</p>
+        <p class="mt-2 text-sm text-text-dim">Pull values out of a response by JSON path, LR (left/right), CSS selector, or Regex, with prefix/suffix, all-matches, and capture flags.</p>
       </div>
 
       <div class="rounded-lg border border-border bg-surface p-6 transition hover:border-border-hi">
@@ -307,7 +273,7 @@
           <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path stroke-linecap="round" stroke-linejoin="round" d="M19 12a7 7 0 0 0-.1-1l2-1.6-2-3.4-2.4 1a7 7 0 0 0-1.7-1l-.3-2.5H9.5l-.4 2.5a7 7 0 0 0-1.7 1l-2.3-1-2 3.4 2 1.6a7 7 0 0 0 0 2l-2 1.6 2 3.4 2.3-1a7 7 0 0 0 1.7 1l.4 2.5h4.9l.4-2.5a7 7 0 0 0 1.7-1l2.3 1 2-3.4-2-1.6c.1-.3.1-.7.1-1Z"/></svg>
         </div>
         <h3 class="mt-4 font-semibold">Themeable &amp; local-first</h3>
-        <p class="mt-2 text-sm text-text-dim">Dark/light/system theme, accent &amp; density, engine defaults, and finish notifications — all stored on your machine. No cloud.</p>
+        <p class="mt-2 text-sm text-text-dim">Dark/light/system theme, accent and density, engine defaults, and finish notifications, all stored on your machine. No cloud.</p>
       </div>
     </div>
   </div>
@@ -316,13 +282,12 @@
 <!-- ======================= SCREENSHOTS ======================= -->
 <section id="screenshots" class="border-t border-border bg-surface/40">
   <div class="mx-auto max-w-6xl px-4 py-20">
-    <h2 class="text-center text-3xl font-bold tracking-tight">A closer look</h2>
+    <h2 class="text-center text-3xl font-bold tracking-tight">Screenshots</h2>
     <p class="mx-auto mt-3 max-w-xl text-center text-text-dim">
-      Placeholder frames — drop your real screenshots into <span class="font-mono text-sm">assets/</span> and swap the panels below.
+      The Jobs, Configs, and Hits DB tabs.
     </p>
 
-    <div class="mt-12 grid gap-6 md:grid-cols-2">
-      <!-- shot frame -->
+    <div class="mx-auto mt-12 max-w-4xl space-y-8">
       <figure class="overflow-hidden rounded-lg border border-border bg-surface">
         <div class="flex items-center gap-2 border-b border-border bg-surface-2 px-4 py-2">
           <span class="h-2.5 w-2.5 rounded-full bg-border-hi"></span>
@@ -330,10 +295,9 @@
           <span class="h-2.5 w-2.5 rounded-full bg-border-hi"></span>
           <span class="ml-2 font-mono text-xs text-text-mute">Jobs</span>
         </div>
-        <div class="grid aspect-video place-items-center bg-bg text-text-mute">
-          <span class="font-mono text-sm">screenshot — Jobs tab</span>
-        </div>
-        <figcaption class="border-t border-border px-4 py-3 text-sm text-text-dim">Dense job list with live per-runner outcome counters.</figcaption>
+        <img src="assets/shot-jobs.png" width="1920" height="1080" loading="lazy"
+             alt="OpenLych Jobs tab with New, Start All, Stop All, and Remove All controls" class="block w-full" />
+        <figcaption class="border-t border-border px-4 py-3 text-sm text-text-dim">The Jobs tab: create jobs and start, stop, or remove them. Outcome counters update per runner as a job runs.</figcaption>
       </figure>
 
       <figure class="overflow-hidden rounded-lg border border-border bg-surface">
@@ -341,12 +305,11 @@
           <span class="h-2.5 w-2.5 rounded-full bg-border-hi"></span>
           <span class="h-2.5 w-2.5 rounded-full bg-border-hi"></span>
           <span class="h-2.5 w-2.5 rounded-full bg-border-hi"></span>
-          <span class="ml-2 font-mono text-xs text-text-mute">Stacker</span>
+          <span class="ml-2 font-mono text-xs text-text-mute">Configs / Stacker (text)</span>
         </div>
-        <div class="grid aspect-video place-items-center bg-bg text-text-mute">
-          <span class="font-mono text-sm">screenshot — visual flow editor</span>
-        </div>
-        <figcaption class="border-t border-border px-4 py-3 text-sm text-text-dim">Stacked blocks with drag-reorder, or the KDL text editor.</figcaption>
+        <img src="assets/shot-config-text.png" width="1920" height="1080" loading="lazy"
+             alt="OpenLych Config editor showing the same flow as highlighted KDL text" class="block w-full" />
+        <figcaption class="border-t border-border px-4 py-3 text-sm text-text-dim">The same flow as KDL text, with syntax highlighting and a Validate button. Switch between Blocks and Text at any time.</figcaption>
       </figure>
 
       <figure class="overflow-hidden rounded-lg border border-border bg-surface">
@@ -356,23 +319,9 @@
           <span class="h-2.5 w-2.5 rounded-full bg-border-hi"></span>
           <span class="ml-2 font-mono text-xs text-text-mute">Hits DB</span>
         </div>
-        <div class="grid aspect-video place-items-center bg-bg text-text-mute">
-          <span class="font-mono text-sm">screenshot — Hits DB</span>
-        </div>
-        <figcaption class="border-t border-border px-4 py-3 text-sm text-text-dim">Persisted hits in SQLite with filters and capture search.</figcaption>
-      </figure>
-
-      <figure class="overflow-hidden rounded-lg border border-border bg-surface">
-        <div class="flex items-center gap-2 border-b border-border bg-surface-2 px-4 py-2">
-          <span class="h-2.5 w-2.5 rounded-full bg-border-hi"></span>
-          <span class="h-2.5 w-2.5 rounded-full bg-border-hi"></span>
-          <span class="h-2.5 w-2.5 rounded-full bg-border-hi"></span>
-          <span class="ml-2 font-mono text-xs text-text-mute">Settings</span>
-        </div>
-        <div class="grid aspect-video place-items-center bg-bg text-text-mute">
-          <span class="font-mono text-sm">screenshot — Settings</span>
-        </div>
-        <figcaption class="border-t border-border px-4 py-3 text-sm text-text-dim">Appearance, engine defaults, notifications, and data tools.</figcaption>
+        <img src="assets/shot-hits-db.png" width="1920" height="1080" loading="lazy"
+             alt="OpenLych Hits DB tab with config and type filters, a results table, and capture search" class="block w-full" />
+        <figcaption class="border-t border-border px-4 py-3 text-sm text-text-dim">Captured hits persist to SQLite, filterable by config and type, with capture search across stored data.</figcaption>
       </figure>
     </div>
   </div>
@@ -381,7 +330,7 @@
 <!-- ======================= HOW IT WORKS ======================= -->
 <section class="border-t border-border">
   <div class="mx-auto max-w-5xl px-4 py-20">
-    <h2 class="text-center text-3xl font-bold tracking-tight">From flow to results in three steps</h2>
+    <h2 class="text-center text-3xl font-bold tracking-tight">How it works</h2>
     <div class="mt-12 grid gap-8 md:grid-cols-3">
       <div>
         <span class="font-mono text-sm font-bold text-accent">01</span>

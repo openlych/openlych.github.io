@@ -21,8 +21,6 @@ python3 -m http.server 8000   # then open http://localhost:8000
 
 ## TODO before publishing
 
-- Replace the placeholder screenshot frames (Jobs / Stacker / Hits DB / Settings)
-  with real captures dropped into `assets/`.
 - Swap the `github.com/your/openlych` links for the real repo + releases URLs.
 
 ## Deploy
