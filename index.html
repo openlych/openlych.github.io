@@ -176,17 +176,9 @@
 
     <!-- hero mock: faux Jobs tab -->
     <div class="mx-auto mt-14 max-w-4xl">
-      <div class="overflow-hidden rounded-lg border border-border bg-surface shadow-2xl shadow-black/20">
-        <div class="flex items-center gap-2 border-b border-border bg-surface-2 px-4 py-2.5">
-          <span class="h-3 w-3 rounded-full bg-err/70"></span>
-          <span class="h-3 w-3 rounded-full bg-warn/70"></span>
-          <span class="h-3 w-3 rounded-full bg-ok/70"></span>
-          <span class="ml-3 font-mono text-xs text-text-mute">openlych</span>
-        </div>
-        <img src="assets/shot-stacker-blocks.png" width="1920" height="1080"
-             alt="OpenLych Configs tab, Stacker view: a Request block and an If block with Then/Else result steps"
-             class="block w-full" loading="eager" />
-      </div>
+      <img src="assets/shot-stacker-blocks.png" width="1920" height="1080"
+           alt="OpenLych Configs tab, Stacker view: a Request block and an If block with Then/Else result steps"
+           class="block w-full rounded-lg border border-border shadow-2xl shadow-black/20" loading="eager" />
       <p class="mt-3 text-center text-sm text-text-dim">Building a flow as visual blocks in the Config editor.</p>
     </div>
   </div>
@@ -287,41 +279,26 @@
       The Jobs, Configs, and Hits DB tabs.
     </p>
 
-    <div class="mx-auto mt-12 max-w-4xl space-y-8">
-      <figure class="overflow-hidden rounded-lg border border-border bg-surface">
-        <div class="flex items-center gap-2 border-b border-border bg-surface-2 px-4 py-2">
-          <span class="h-2.5 w-2.5 rounded-full bg-border-hi"></span>
-          <span class="h-2.5 w-2.5 rounded-full bg-border-hi"></span>
-          <span class="h-2.5 w-2.5 rounded-full bg-border-hi"></span>
-          <span class="ml-2 font-mono text-xs text-text-mute">Jobs</span>
-        </div>
+    <div class="mt-12 grid gap-6 md:grid-cols-3">
+      <figure>
         <img src="assets/shot-jobs.png" width="1920" height="1080" loading="lazy"
-             alt="OpenLych Jobs tab with New, Start All, Stop All, and Remove All controls" class="block w-full" />
-        <figcaption class="border-t border-border px-4 py-3 text-sm text-text-dim">The Jobs tab: create jobs and start, stop, or remove them. Outcome counters update per runner as a job runs.</figcaption>
+             alt="OpenLych Jobs tab with New, Start All, Stop All, and Remove All controls"
+             class="block w-full rounded-lg border border-border" />
+        <figcaption class="mt-3 text-sm text-text-dim"><span class="font-medium text-text">Jobs.</span> Create jobs and start, stop, or remove them. Counters update per runner as a job runs.</figcaption>
       </figure>
 
-      <figure class="overflow-hidden rounded-lg border border-border bg-surface">
-        <div class="flex items-center gap-2 border-b border-border bg-surface-2 px-4 py-2">
-          <span class="h-2.5 w-2.5 rounded-full bg-border-hi"></span>
-          <span class="h-2.5 w-2.5 rounded-full bg-border-hi"></span>
-          <span class="h-2.5 w-2.5 rounded-full bg-border-hi"></span>
-          <span class="ml-2 font-mono text-xs text-text-mute">Configs / Stacker (text)</span>
-        </div>
+      <figure>
         <img src="assets/shot-config-text.png" width="1920" height="1080" loading="lazy"
-             alt="OpenLych Config editor showing the same flow as highlighted KDL text" class="block w-full" />
-        <figcaption class="border-t border-border px-4 py-3 text-sm text-text-dim">The same flow as KDL text, with syntax highlighting and a Validate button. Switch between Blocks and Text at any time.</figcaption>
+             alt="OpenLych Config editor showing the same flow as highlighted KDL text"
+             class="block w-full rounded-lg border border-border" />
+        <figcaption class="mt-3 text-sm text-text-dim"><span class="font-medium text-text">Configs (text).</span> The same flow as highlighted KDL, with a Validate button. Switch Blocks and Text any time.</figcaption>
       </figure>
 
-      <figure class="overflow-hidden rounded-lg border border-border bg-surface">
-        <div class="flex items-center gap-2 border-b border-border bg-surface-2 px-4 py-2">
-          <span class="h-2.5 w-2.5 rounded-full bg-border-hi"></span>
-          <span class="h-2.5 w-2.5 rounded-full bg-border-hi"></span>
-          <span class="h-2.5 w-2.5 rounded-full bg-border-hi"></span>
-          <span class="ml-2 font-mono text-xs text-text-mute">Hits DB</span>
-        </div>
+      <figure>
         <img src="assets/shot-hits-db.png" width="1920" height="1080" loading="lazy"
-             alt="OpenLych Hits DB tab with config and type filters, a results table, and capture search" class="block w-full" />
-        <figcaption class="border-t border-border px-4 py-3 text-sm text-text-dim">Captured hits persist to SQLite, filterable by config and type, with capture search across stored data.</figcaption>
+             alt="OpenLych Hits DB tab with config and type filters, a results table, and capture search"
+             class="block w-full rounded-lg border border-border" />
+        <figcaption class="mt-3 text-sm text-text-dim"><span class="font-medium text-text">Hits DB.</span> Captured hits persist to SQLite, filterable by config and type, with capture search.</figcaption>
       </figure>
     </div>
   </div>
