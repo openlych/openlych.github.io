@@ -19,10 +19,6 @@ python3 -m http.server 8000   # then open http://localhost:8000
 - `index.html` — the whole page (markup + Tailwind config + theme toggle)
 - `assets/` — logo SVGs, favicon, app icon
 
-## TODO before publishing
-
-- Swap the `github.com/your/openlych` links for the real repo + releases URLs.
-
 ## Deploy
 
-Any static host (GitHub Pages, Netlify, a plain web server). Nothing to build.
+Served by GitHub Pages from `openlych/openlych.github.io` (`main`, root) at https://openlych.github.io/. Nothing to build.
