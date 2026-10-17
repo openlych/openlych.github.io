@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>OpenLych: local web-testing workbench</title>
-<meta name="description" content="OpenLych is a local web-testing workbench. Define a staged request flow, point a job at a list, and run it with parallel runners while outcomes update live. For authorized security research only." />
+<title>OpenLych: a local workbench for request flows</title>
+<meta name="description" content="OpenLych is a local workbench for request flows. Build a staged flow of steps, point a job at a list, and run it across parallel runners while outcomes update live. HTTP, raw sockets, mail protocols, and a headless browser, all from one config. For authorized testing only." />
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
 
 <!-- Theme init: set .dark before paint to avoid a flash. -->
@@ -95,6 +95,11 @@
     mask-image: radial-gradient(ellipse 70% 60% at 50% 35%, #000 40%, transparent 100%);
     -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 35%, #000 40%, transparent 100%);
   }
+  /* tiny syntax colouring for the KDL sample */
+  .kdl-node    { color: var(--accent); font-weight: 600; }
+  .kdl-string  { color: var(--ok); }
+  .kdl-prop    { color: var(--info); }
+  .kdl-comment { color: var(--text-mute); }
 </style>
 </head>
 
@@ -104,7 +109,6 @@
 <header class="sticky top-0 z-40 border-b border-border bg-bg/80 backdrop-blur">
   <div class="mx-auto flex h-16 max-w-6xl items-center justify-between px-4">
     <a href="#top" class="flex items-center gap-2.5" aria-label="OpenLych home">
-      <!-- mark -->
       <svg width="30" height="30" viewBox="0 0 64 64" aria-hidden="true">
         <mask id="navmask">
           <rect width="64" height="64" fill="#fff" />
@@ -120,7 +124,8 @@
 
     <nav class="hidden items-center gap-7 text-sm text-text-dim md:flex">
       <a href="#overview"    class="transition hover:text-text">Overview</a>
-      <a href="#features"    class="transition hover:text-text">Features</a>
+      <a href="#capabilities" class="transition hover:text-text">Capabilities</a>
+      <a href="#flow"        class="transition hover:text-text">A flow</a>
       <a href="#screenshots" class="transition hover:text-text">Screenshots</a>
       <a href="#safety"      class="transition hover:text-text">Safety</a>
     </nav>
@@ -152,18 +157,20 @@
   <div class="relative mx-auto max-w-6xl px-4 pb-16 pt-20 text-center md:pt-28">
     <span class="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-3 py-1 text-xs font-medium text-text-dim">
       <span class="h-1.5 w-1.5 rounded-full bg-ok"></span>
-      Linux desktop · headless browser · Windows planned
+      Linux desktop &middot; headless browser mode &middot; Windows planned
     </span>
 
     <h1 class="mx-auto mt-6 max-w-3xl text-4xl font-bold leading-[1.1] tracking-tight md:text-6xl">
-      The local web-testing<br class="hidden sm:block" /> workbench
+      A local workbench<br class="hidden sm:block" /> for request flows
     </h1>
 
     <p class="mx-auto mt-5 max-w-xl text-lg text-text-dim">
-      Define a staged request <strong class="font-semibold text-text">flow</strong>, point a
+      Build a staged <strong class="font-semibold text-text">flow</strong> of steps, point a
       <strong class="font-semibold text-text">job</strong> at an input
-      <strong class="font-semibold text-text">list</strong>, and run it with
-      <em class="not-italic text-accent">N parallel runners</em>. Outcomes update live, per runner.
+      <strong class="font-semibold text-text">list</strong>, and run it across
+      <em class="not-italic text-accent">N parallel runners</em> while results land live.
+      HTTP requests, parsers, crypto, raw sockets, mail protocols, scripts, and a headless
+      browser, all in one config.
     </p>
 
     <div class="mt-8 flex flex-wrap items-center justify-center gap-3">
@@ -176,9 +183,9 @@
         View on GitHub
       </a>
     </div>
-    <p class="mt-4 font-mono text-xs text-text-mute">Open source · runs entirely on your machine</p>
+    <p class="mt-4 font-mono text-xs text-text-mute">Open source &middot; runs entirely on your machine</p>
 
-    <!-- hero mock: faux Jobs tab -->
+    <!-- hero shot: the Stacker -->
     <div class="mx-auto mt-14 max-w-4xl">
       <img src="assets/shot-stacker-blocks.png" width="1920" height="1080"
            alt="OpenLych Configs tab, Stacker view: a Request block and an If block with Then/Else result steps"
@@ -193,90 +200,171 @@
   <div class="mx-auto max-w-4xl px-4 py-20">
     <h2 class="text-sm font-semibold uppercase tracking-wider text-accent">What it is</h2>
     <p class="mt-4 text-2xl font-semibold leading-snug md:text-3xl">
-      OpenLych is a workbench for testing how web requests behave, built, run, and inspected
-      entirely on your own machine.
+      A tool for testing how a system answers, built, run, and inspected entirely on your own machine.
     </p>
     <div class="mt-6 space-y-4 text-text-dim">
       <p>
-        You build a <strong class="font-medium text-text">flow</strong> as a top-to-bottom stack of
-        steps (Request, Parse, Set, Key Check, If, Repeat, Result), visually with drag-to-reorder
-        blocks or as KDL text. A <strong class="font-medium text-text">job</strong> aims that flow
-        at an input <strong class="font-medium text-text">list</strong> (a wordlist or CSV) and runs
-        it across <strong class="font-medium text-text">N runners</strong> pulling a shared queue.
+        A <strong class="font-medium text-text">flow</strong> is a top-to-bottom stack of steps:
+        send a request, parse the response, compute a hash, branch on a condition, open a mail
+        connection, drive a browser, or run a script. You build it as drag-to-reorder blocks or
+        as KDL text; the two views edit the same file.
       </p>
       <p>
-        Results land in live outcome buckets with per-item detail and captured values. Each list
-        item runs in its own cookie-jar session, so a login's <span class="font-mono text-sm">Set-Cookie</span>
-        carries through the item's later requests automatically. It runs as a native desktop window
-        or headless in the browser.
+        A <strong class="font-medium text-text">job</strong> aims that flow at a wordlist or CSV
+        and runs it once per line across <strong class="font-medium text-text">N runners</strong>.
+        Every line runs in its own cookie-jar session, so a login's
+        <span class="font-mono text-sm">Set-Cookie</span> carries through that item's later
+        requests automatically. Each item ends in an outcome bucket (valid, invalid, retry, or
+        your own) with captured values attached, and the counters update live per runner.
+      </p>
+      <p>
+        It runs as a native desktop window, or headless as a local server you open in a browser.
+        Both use the same UI over the same engine. Wordlists, proxies, configs, hits, and
+        settings all live in one data folder on your disk.
       </p>
     </div>
   </div>
 </section>
 
-<!-- ======================= FEATURES ======================= -->
-<section id="features" class="border-t border-border">
+<!-- ======================= CAPABILITIES ======================= -->
+<section id="capabilities" class="border-t border-border">
   <div class="mx-auto max-w-6xl px-4 py-20">
-    <h2 class="text-center text-3xl font-bold tracking-tight">One window, five tabs</h2>
+    <h2 class="text-center text-3xl font-bold tracking-tight">What a flow can do</h2>
     <p class="mx-auto mt-3 max-w-xl text-center text-text-dim">
-      Jobs, Configs, Wordlists, Hits DB, and Settings. Build configs, run jobs, and browse results in one place.
+      One window: Jobs, Configs, Wordlists, Proxies, Hits DB, Settings.
+      One config language under all of it.
     </p>
 
     <div class="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      <!-- card -->
       <div class="rounded-lg border border-border bg-surface p-6 transition hover:border-border-hi">
         <div class="grid h-10 w-10 place-items-center rounded-md bg-accent-dim text-accent">
           <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="4" rx="1"/><rect x="3" y="10" width="18" height="4" rx="1"/><rect x="3" y="16" width="18" height="4" rx="1"/></svg>
         </div>
-        <h3 class="mt-4 font-semibold">Visual flow builder</h3>
-        <p class="mt-2 text-sm text-text-dim">Stacked blocks with drag-reorder and collapsible branch/loop steps, or edit the same config as highlighted KDL text.</p>
-      </div>
-
-      <div class="rounded-lg border border-border bg-surface p-6 transition hover:border-border-hi">
-        <div class="grid h-10 w-10 place-items-center rounded-md bg-accent-dim text-accent">
-          <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 2 3 14h7l-1 8 10-12h-7l1-8Z"/></svg>
-        </div>
-        <h3 class="mt-4 font-semibold">Parallel execution engine</h3>
-        <p class="mt-2 text-sm text-text-dim">N runners pull a shared queue and sort each item into outcome buckets, with per-item results and captures as it runs.</p>
+        <h3 class="mt-4 font-semibold">HTTP with full control</h3>
+        <p class="mt-2 text-sm text-text-dim">Templated headers and bodies (text, file, raw, multipart), Basic auth, a TLS floor, redirect handling, and a per-item cookie jar.</p>
       </div>
 
       <div class="rounded-lg border border-border bg-surface p-6 transition hover:border-border-hi">
         <div class="grid h-10 w-10 place-items-center rounded-md bg-accent-dim text-accent">
           <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 7h16M4 12h10M4 17h7"/></svg>
         </div>
-        <h3 class="mt-4 font-semibold">Four parse modes</h3>
-        <p class="mt-2 text-sm text-text-dim">Pull values out of a response by JSON path, LR (left/right), CSS selector, or Regex, with prefix/suffix, all-matches, and capture flags.</p>
+        <h3 class="mt-4 font-semibold">Five parse modes</h3>
+        <p class="mt-2 text-sm text-text-dim">Pull values out of any response by JSON path, LR (left/right), CSS selector, XPath, or regex, with prefix/suffix, all-matches, and capture flags.</p>
       </div>
 
       <div class="rounded-lg border border-border bg-surface p-6 transition hover:border-border-hi">
         <div class="grid h-10 w-10 place-items-center rounded-md bg-accent-dim text-accent">
           <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v18m0-18 7 4v10l-7 4-7-4V7l7-4Z"/></svg>
         </div>
-        <h3 class="mt-4 font-semibold">Full request control</h3>
-        <p class="mt-2 text-sm text-text-dim">Auto-redirect toggle, templated basic auth, a TLS floor, multipart/form-data bodies, and a per-item cookie jar.</p>
+        <h3 class="mt-4 font-semibold">60+ built-in functions</h3>
+        <p class="mt-2 text-sm text-text-dim">Hashes and HMAC, AES and RSA, bcrypt and scrypt, JWT, AWS4 signing, dates, random values, and captcha solving through 2Captcha or CapMonster.</p>
       </div>
 
       <div class="rounded-lg border border-border bg-surface p-6 transition hover:border-border-hi">
         <div class="grid h-10 w-10 place-items-center rounded-md bg-accent-dim text-accent">
           <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><ellipse cx="12" cy="6" rx="8" ry="3"/><path stroke-linecap="round" d="M4 6v12c0 1.7 3.6 3 8 3s8-1.3 8-3V6M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></svg>
         </div>
-        <h3 class="mt-4 font-semibold">Wordlists &amp; Hits DB</h3>
-        <p class="mt-2 text-sm text-text-dim">Load txt/CSV datasets as variables; captured hits persist to SQLite with config/type filters and capture search.</p>
+        <h3 class="mt-4 font-semibold">Beyond HTTP</h3>
+        <p class="mt-2 text-sm text-text-dim">Raw TCP and UDP, WebSocket, DNS, POP3, IMAP, SMTP with attachments, FTP, and SSH, all as flow steps with named connection handles.</p>
+      </div>
+
+      <div class="rounded-lg border border-border bg-surface p-6 transition hover:border-border-hi">
+        <div class="grid h-10 w-10 place-items-center rounded-md bg-accent-dim text-accent">
+          <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" stroke-linejoin="round" d="M3 12h7l2-4 2 6 2-2h5"/></svg>
+        </div>
+        <h3 class="mt-4 font-semibold">Headless browser steps</h3>
+        <p class="mt-2 text-sm text-text-dim">Drive Chromium over CDP from inside a flow: navigate, click, type, select, screenshot, execute JS. One isolated context per item.</p>
+      </div>
+
+      <div class="rounded-lg border border-border bg-surface p-6 transition hover:border-border-hi">
+        <div class="grid h-10 w-10 place-items-center rounded-md bg-accent-dim text-accent">
+          <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m8 6-6 6 6 6M16 6l6 6-6 6"/></svg>
+        </div>
+        <h3 class="mt-4 font-semibold">Your own code</h3>
+        <p class="mt-2 text-sm text-text-dim">Inline JavaScript on an embedded engine, or Python and shell via subprocess, with variables crossing in and out by name.</p>
+      </div>
+
+      <div class="rounded-lg border border-border bg-surface p-6 transition hover:border-border-hi">
+        <div class="grid h-10 w-10 place-items-center rounded-md bg-accent-dim text-accent">
+          <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v18m0-18 7 4v10l-7 4-7-4V7l7-4Z"/><path stroke-linecap="round" d="M12 8v4m0 4h.01"/></svg>
+        </div>
+        <h3 class="mt-4 font-semibold">Lists, files, dictionaries</h3>
+        <p class="mt-2 text-sm text-text-dim">Utility steps sort, shuffle, zip, and dedupe lists, read and write files in a sandboxed folder, and build dictionaries, all from a flow.</p>
+      </div>
+
+      <div class="rounded-lg border border-border bg-surface p-6 transition hover:border-border-hi">
+        <div class="grid h-10 w-10 place-items-center rounded-md bg-accent-dim text-accent">
+          <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12a7 7 0 0 1 7-7c2 0 3.5.8 4.5 2l2-2A10 10 0 0 0 5.5 6"/><path stroke-linecap="round" stroke-linejoin="round" d="M5 4v4h4"/><circle cx="12" cy="12" r="3"/></svg>
+        </div>
+        <h3 class="mt-4 font-semibold">Proxies and banning</h3>
+        <p class="mt-2 text-sm text-text-dim">HTTP and SOCKS lists with a built-in checker, round-robin rotation, per-job use limits, and ban keys that drop a proxy on a blocked response.</p>
+      </div>
+
+      <div class="rounded-lg border border-border bg-surface p-6 transition hover:border-border-hi">
+        <div class="grid h-10 w-10 place-items-center rounded-md bg-accent-dim text-accent">
+          <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4h16v12H5.2L4 17.2V4Z"/><path stroke-linecap="round" d="M8 9h8M8 12h5"/></svg>
+        </div>
+        <h3 class="mt-4 font-semibold">Hits that travel</h3>
+        <p class="mt-2 text-sm text-text-dim">Hits persist to SQLite with filters and capture search, and can forward live to a webhook, a JSONL file, or a Telegram chat.</p>
+      </div>
+
+      <div class="rounded-lg border border-border bg-surface p-6 transition hover:border-border-hi">
+        <div class="grid h-10 w-10 place-items-center rounded-md bg-accent-dim text-accent">
+          <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v12m0 0 4-4m-4 4-4-4"/><path stroke-linecap="round" stroke-linejoin="round" d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
+        </div>
+        <h3 class="mt-4 font-semibold">OpenBullet configs</h3>
+        <p class="mt-2 text-sm text-text-dim">Import OB1 LoliScript, OB2 LoliCode, and .opk packages; unmapped blocks become visible placeholders you finish by hand. Export back to LoliCode or .opk.</p>
       </div>
 
       <div class="rounded-lg border border-border bg-surface p-6 transition hover:border-border-hi">
         <div class="grid h-10 w-10 place-items-center rounded-md bg-accent-dim text-accent">
           <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path stroke-linecap="round" stroke-linejoin="round" d="M19 12a7 7 0 0 0-.1-1l2-1.6-2-3.4-2.4 1a7 7 0 0 0-1.7-1l-.3-2.5H9.5l-.4 2.5a7 7 0 0 0-1.7 1l-2.3-1-2 3.4 2 1.6a7 7 0 0 0 0 2l-2 1.6 2 3.4 2.3-1a7 7 0 0 0 1.7 1l.4 2.5h4.9l.4-2.5a7 7 0 0 0 1.7-1l2.3 1 2-3.4-2-1.6c.1-.3.1-.7.1-1Z"/></svg>
         </div>
-        <h3 class="mt-4 font-semibold">Themeable &amp; local-first</h3>
-        <p class="mt-2 text-sm text-text-dim">Dark/light/system theme, accent and density, engine defaults, and finish notifications, all stored on your machine. No cloud.</p>
+        <h3 class="mt-4 font-semibold">Local first</h3>
+        <p class="mt-2 text-sm text-text-dim">Dark/light themes, accent and density, engine defaults, notifications, sounds, and data tools, all stored on your machine. No cloud, no account.</p>
       </div>
     </div>
   </div>
 </section>
 
+<!-- ======================= A FLOW ======================= -->
+<section id="flow" class="border-t border-border bg-surface/40">
+  <div class="mx-auto max-w-4xl px-4 py-20">
+    <h2 class="text-center text-3xl font-bold tracking-tight">What a flow looks like</h2>
+    <p class="mx-auto mt-3 max-w-xl text-center text-text-dim">
+      The same config, as KDL text or as blocks. Here: a WebSocket echo, an SSH command, and a
+      captcha-solved login step, all from shipped sample configs.
+    </p>
+
+    <div class="mx-auto mt-10 max-w-3xl overflow-x-auto rounded-lg border border-border bg-surface-2 p-5">
+      <pre class="font-mono text-sm leading-relaxed"><code><span class="kdl-comment">// echo over a WebSocket, reply into a variable</span>
+<span class="kdl-node">net</span> ws_connect handle=ws into=c <span class="kdl-prop">url</span>=<span class="kdl-string">"wss://ws.ifelse.io"</span>
+<span class="kdl-node">net</span> ws_send handle=ws into=_ message=<span class="kdl-string">"hello"</span>
+<span class="kdl-node">net</span> ws_read handle=ws into=reply
+
+<span class="kdl-comment">// run a command over SSH</span>
+<span class="kdl-node">net</span> ssh_connect handle=s into=ok host=<span class="kdl-string">"203.0.113.7"</span> port=22
+<span class="kdl-node">net</span> ssh_auth_password handle=s into=ok user=<span class="kdl-string">"root"</span> pass=<span class="kdl-string">"{{PASSWORD}}"</span>
+<span class="kdl-node">net</span> ssh_run handle=s into=uptime command=<span class="kdl-string">"uptime"</span>
+
+<span class="kdl-comment">// solve a captcha, then log in</span>
+<span class="kdl-node">function</span> solve captcha-image <span class="kdl-string">"{{b64image}}"</span> capture=<span class="kdl-string">#true</span>
+<span class="kdl-node">request</span> POST <span class="kdl-string">"https://example.test/login"</span> {
+    <span class="kdl-node">body</span> text <span class="kdl-string">"user={{USERNAME}}&amp;captcha={{solve}}"</span>
+}
+<span class="kdl-node">key-check</span> { chain <span class="kdl-string">"valid"</span> { status 200; contains <span class="kdl-string">"Welcome"</span> } }</code></pre>
+    </div>
+    <p class="mt-5 text-center text-sm text-text-dim">
+      Variables template with <span class="font-mono text-xs">{{name}}</span> or
+      <span class="font-mono text-xs">&lt;NAME&gt;</span>. Read the
+      <a href="https://openlych.github.io/openlych-docs/kdl/index.html" target="_blank" rel="noopener" class="font-medium text-accent underline underline-offset-2 hover:text-accent-hi">KDL reference</a>
+      for every step.
+    </p>
+  </div>
+</section>
+
 <!-- ======================= SCREENSHOTS ======================= -->
-<section id="screenshots" class="border-t border-border bg-surface/40">
+<section id="screenshots" class="border-t border-border">
   <div class="mx-auto max-w-6xl px-4 py-20">
     <h2 class="text-center text-3xl font-bold tracking-tight">Screenshots</h2>
     <p class="mx-auto mt-3 max-w-xl text-center text-text-dim">
@@ -288,14 +376,14 @@
         <img src="assets/shot-jobs.png" width="1920" height="1080" loading="lazy"
              alt="OpenLych Jobs tab with New, Start All, Stop All, and Remove All controls"
              class="block w-full rounded-lg border border-border" />
-        <figcaption class="mt-3 text-sm text-text-dim"><span class="font-medium text-text">Jobs.</span> Create jobs and start, stop, or remove them. Counters update per runner as a job runs.</figcaption>
+        <figcaption class="mt-3 text-sm text-text-dim"><span class="font-medium text-text">Jobs.</span> Every job with its config, list, and bot count. Counters update per runner as a job runs.</figcaption>
       </figure>
 
       <figure>
         <img src="assets/shot-config-text.png" width="1920" height="1080" loading="lazy"
              alt="OpenLych Config editor showing the same flow as highlighted KDL text"
              class="block w-full rounded-lg border border-border" />
-        <figcaption class="mt-3 text-sm text-text-dim"><span class="font-medium text-text">Configs (text).</span> The same flow as highlighted KDL, with a Validate button. Switch Blocks and Text any time.</figcaption>
+        <figcaption class="mt-3 text-sm text-text-dim"><span class="font-medium text-text">Configs (text).</span> The same flow as highlighted KDL. Switch Blocks and Text any time; both edit one file.</figcaption>
       </figure>
 
       <figure>
@@ -308,32 +396,32 @@
   </div>
 </section>
 
-<!-- ======================= HOW IT WORKS ======================= -->
-<section class="border-t border-border">
+<!-- ======================= HOW IT RUNS ======================= -->
+<section class="border-t border-border bg-surface/40">
   <div class="mx-auto max-w-5xl px-4 py-20">
-    <h2 class="text-center text-3xl font-bold tracking-tight">How it works</h2>
+    <h2 class="text-center text-3xl font-bold tracking-tight">How it runs</h2>
     <div class="mt-12 grid gap-8 md:grid-cols-3">
       <div>
         <span class="font-mono text-sm font-bold text-accent">01</span>
-        <h3 class="mt-2 font-semibold">Build a flow</h3>
-        <p class="mt-2 text-sm text-text-dim">Stack Request / Parse / Set / Key Check / If / Repeat / Result blocks. Template fields with <span class="font-mono text-xs">{{name}}</span> or <span class="font-mono text-xs">&lt;NAME&gt;</span> variables.</p>
+        <h3 class="mt-2 font-semibold">Build the config</h3>
+        <p class="mt-2 text-sm text-text-dim">Stack blocks or write KDL. The Debug panel runs it once against a single data line and shows the per-step log, variables, and response HTML.</p>
       </div>
       <div>
         <span class="font-mono text-sm font-bold text-accent">02</span>
         <h3 class="mt-2 font-semibold">Point a job at a list</h3>
-        <p class="mt-2 text-sm text-text-dim">Pick a wordlist or CSV and a runner count. Each line seeds variables; CSV columns become named variables.</p>
+        <p class="mt-2 text-sm text-text-dim">Pick a wordlist or CSV, a bot count, proxies if the config wants them. List types and data rules skip lines that do not fit.</p>
       </div>
       <div>
         <span class="font-mono text-sm font-bold text-accent">03</span>
-        <h3 class="mt-2 font-semibold">Run &amp; inspect</h3>
-        <p class="mt-2 text-sm text-text-dim">Watch outcome counters update live per runner, open any item's detail, and keep the hits you captured.</p>
+        <h3 class="mt-2 font-semibold">Run and keep the results</h3>
+        <p class="mt-2 text-sm text-text-dim">Watch counters per runner and per bucket, stop or resume mid-list, and keep captured hits in the Hits DB or forward them to a webhook, file, or Telegram.</p>
       </div>
     </div>
   </div>
 </section>
 
 <!-- ======================= SAFETY / DISCLAIMER ======================= -->
-<section id="safety" class="border-t border-border bg-surface/40">
+<section id="safety" class="border-t border-border">
   <div class="mx-auto max-w-4xl px-4 py-20">
     <div class="rounded-lg border-2 border-accent/60 bg-surface p-8">
       <div class="flex items-center gap-3">
@@ -341,22 +429,22 @@
         <h2 class="text-2xl font-bold tracking-tight">Authorized use only</h2>
       </div>
       <p class="mt-5 text-text-dim">
-        OpenLych is a tool for <strong class="font-semibold text-text">security research and testing systems you own
-        or are explicitly authorized to test</strong>. It exists to help you understand and harden your own
-        applications.
+        OpenLych is a tool for <strong class="font-semibold text-text">testing systems you own or are
+        explicitly authorized to test</strong>: load testing, QA automation, API checks, scraping your
+        own data, security assessments under contract.
       </p>
       <ul class="mt-5 space-y-3 text-sm text-text-dim">
         <li class="flex gap-3">
-          <span class="mt-0.5 text-ok" aria-hidden="true">✓</span>
-          <span>Use it only against targets you own, or where you hold <strong class="font-medium text-text">written permission</strong> to test.</span>
+          <span class="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-ok" aria-hidden="true"></span>
+          <span>Use it against targets you own, or where you hold <strong class="font-medium text-text">written permission</strong> to test.</span>
         </li>
         <li class="flex gap-3">
-          <span class="mt-0.5 text-err" aria-hidden="true">✕</span>
-          <span><strong class="font-medium text-text">Never</strong> point it at unknown or third-party systems, or at any service without authorization. Doing so is likely illegal.</span>
+          <span class="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-err" aria-hidden="true"></span>
+          <span><strong class="font-medium text-text">Never</strong> point it at third-party systems without authorization. Doing so is likely illegal.</span>
         </li>
         <li class="flex gap-3">
-          <span class="mt-0.5 text-err" aria-hidden="true">✕</span>
-          <span>Not for credential stuffing, account takeover, or any attack on accounts and systems that are not yours.</span>
+          <span class="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-err" aria-hidden="true"></span>
+          <span>Not for credential stuffing, account takeover, or any access to accounts and systems that are not yours.</span>
         </li>
       </ul>
       <p class="mt-5 text-sm text-text-mute">
@@ -368,12 +456,12 @@
 </section>
 
 <!-- ======================= DOWNLOAD / CTA ======================= -->
-<section id="download" class="border-t border-border">
+<section id="download" class="border-t border-border bg-surface/40">
   <div class="mx-auto max-w-3xl px-4 py-24 text-center">
     <h2 class="text-3xl font-bold tracking-tight md:text-4xl">Get OpenLych</h2>
     <p class="mx-auto mt-4 max-w-md text-text-dim">
       Open source and local-first. Grab a build from the releases page, or clone and build it yourself.
-      New to it? Read the <a href="https://openlych.github.io/openlych-docs/" target="_blank" rel="noopener" class="font-medium text-accent underline underline-offset-2 hover:text-accent-hi">docs</a>.
+      New to it? Start with the <a href="https://openlych.github.io/openlych-docs/getting-started/" target="_blank" rel="noopener" class="font-medium text-accent underline underline-offset-2 hover:text-accent-hi">getting-started guide</a>.
     </p>
     <div class="mt-8 flex flex-wrap items-center justify-center gap-3">
       <a href="https://github.com/openlych/openlych/releases" target="_blank" rel="noopener"
@@ -386,7 +474,7 @@
         Source on GitHub
       </a>
     </div>
-    <p class="mt-6 font-mono text-xs text-text-mute">Linux (WebKitGTK) today · Windows 10/11 planned</p>
+    <p class="mt-6 font-mono text-xs text-text-mute">Linux (WebKitGTK) today &middot; Windows 10/11 planned</p>
   </div>
 </section>
 
@@ -406,7 +494,7 @@
       </svg>
       <span class="font-mono text-sm font-bold tracking-tight"><span class="text-text">open</span><span class="text-accent">lych</span></span>
     </div>
-    <p class="text-xs text-text-mute">For authorized security research only. © 2026 OpenLych.</p>
+    <p class="text-xs text-text-mute">For authorized testing only. &copy; 2026 OpenLych.</p>
     <a href="https://github.com/openlych/openlych" target="_blank" rel="noopener" class="text-xs text-text-dim transition hover:text-text">GitHub</a>
   </div>
 </footer>
